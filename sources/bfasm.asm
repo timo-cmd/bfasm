@@ -13,7 +13,7 @@ BITS 32
 %define DATAOFFSET   0x2000
 %define DATASECT     (TEXTSECT + DATAOFFSET)
 
-;; The main conpiler routine begins here
+;; The main compiler routine begins here
 ;; File image generation is beeing done here too
 
         org          TEXTSECT
