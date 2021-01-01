@@ -5,6 +5,9 @@
 ;;	nasm -f bin -o bfasm bfasm.asm
 ;; To use:
 ;;	bfasm < foo.bf > foo.out
+;; To run:
+;;      chmod +x ./foo.out && ./foo.out
+;;
 
 BITS 32
 
