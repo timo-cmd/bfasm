@@ -133,3 +133,35 @@ getchar:        mov     al, 3
                 or      eax, eax
                 jle     eof
 
+;; 177
+;; Otherwise, esi is advanced four bytes (from the epilog code chunk
+;; to the incptr code chunk), and the character read from the input is
+;; stored in al, with the high bytes of eax reset to zero.
+
+                lodsd
+                mov     eax, [ecx]
+
+;; The compiler now compares the input with: "< and >".
+;; esi is beeing redirected to each code chunk 
+
+                cmp     al, '>'
+                jz      emit1byte
+                inc     esi
+                cmp     al, '<'
+                jz      emit1byte
+                inc     esi
+
+;; Now the compiler will parse the other ascii ops in the 
+;; source file.
+
+                sub     al, '+'
+                jz      emit2bytes
+                dec     eax
+                jz      emitgetchar
+                inc     esi
+                inc     esi
+                dec     eax
+                jz      emit2bytes
+                dec     eax
+                jz      emitputchar
+
