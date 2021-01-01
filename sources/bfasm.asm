@@ -5,4 +5,4 @@ BITS 32
 %define DATAOFFSET   0x2000
 %define DATASECT     (TEXTSECT + DATAOFFSET)
 
-        org          TEXTSET
+        org          TEXTSECT
