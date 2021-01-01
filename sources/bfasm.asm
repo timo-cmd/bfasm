@@ -165,3 +165,36 @@ getchar:        mov     al, 3
                 dec     eax
                 jz      emitputchar
 
+;; The remaining instructions such as '[' and ']' are and have some special 
+;; compiling routine. The compiler will again compare the source input for the two instructions and then
+;; redefine them.
+
+                cmp     al, '[' - '.'
+                jz      bracket
+                cmp     al, ']' - '.'
+relay:          jnz     compile
+
+;; The endbracket ']' emits that the loop and the code block between itselfe and '[' ends.
+;; The compiler first emits "cmp dh, [ecx]" and the first two bytes of a "jnz near". The
+;; location of the missing target in the code for the "[" instruction is then retrieved from 
+;; the stack, the correct target value is computed and stored, and then the current instruction's jmp target
+;; is computed and emitted.
+
+endbracket:     mov     eax, 0x850F313A
+                stosd
+                lea     esi, [byte edi - 8]
+                pop     eax
+                sub     esi, eax
+                mov     [eax], esi
+                sub     eax, edi
+                stosd
+                jmp     short relay
+
+;; Now the entrypoint for both the compiler and the compiled input program begins.
+
+_start:
+                mov     ecx, DATASECT
+                inc     edx
+                pusha
+                
+
