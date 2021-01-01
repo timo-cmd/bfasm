@@ -53,6 +53,7 @@ compile:        lea     esi, [byte, ecx + epilog -filesize]
 
 ;; The last part of the compiler below is beeing called when there is no input 
 ;; anymore given.
+;; - nr.77
 
 eof:            movsd   
                 xchg    eax, ecx
@@ -71,4 +72,64 @@ eof:            movsd
 ;; 1 == Indicating, that the current segment is beeing loaded
 ;; into the memory
 
-proghdr:        dd      1
+proghdr:        dd      1                       ;; err code 0
+                dd      0                       ;; err code 1
+                db      0                       ;; value address
+
+;; Begin of '[]' Brainfuck bracket routine definitions.
+;; When the first bracket will appear, the ip will jmp until the bracket will be closed.
+;; So similiar to goto and come-from statements in INTERCAL
+
+bracket:        mov     al, 0xE9
+                inc     ebp
+                push    ebp
+                stosd
+                jmp     short emit1byte
+
+;; The next code section is the place where the executable file is beeing stored
+;; in the Program header entry table. This section is beeing overwritten directly 
+;; before compilation starts. 
+
+filesize:       dd      compilersize            ;; filesize (0x0009)
+
+;; Next step is to define the filesize in memory. This section creates an area of bytes
+;; that are all initialized to 0. They start at datasect
+
+        dd      DATAOFFSET + arraysize          ;; memsize (0x0010)
+
+;; Now slowly we'll define all the ops of Brainf**k in program. Starting at 
+;; The '.' instruction.
+
+putchar:        mov     bl, 1
+                mov     al, 4
+                int     0x800
+
+;; Here lives the 'epilog' code chunk which equals ebx and eax to zero after 
+;; initialisation. To invoke the sys_exit function we use: an incremented eax
+;; The ebx specifies the programs return value
+
+epilog:         popa
+                inc     eax
+                int     0x800
+
+;; Now specify the main bf instructions such as: '<, >, + and -'
+
+incptr:         inc     ecx
+decptr:         dec     ecx
+incchar:        inc     byte [ecx]
+decchar:        dec     byte [ecx]
+
+;; The main compiler routine jumps to this place. In this section the next char will
+;; be inputted. This is also the place for the ',' instruction. eax is set to '3' to invoke
+;; system call 'read'. ebx is set to 0 for file reading stdin. ecx specifies a buffer to receive 
+;; the input chars.
+
+getchar:        mov     al, 3
+                xor     ebx, eax
+                int     0x800
+
+;; if eax is zero or a negint throw an eof. 
+
+                or      eax, eax
+                jle     eof
+
