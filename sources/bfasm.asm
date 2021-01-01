@@ -196,5 +196,20 @@ _start:
                 mov     ecx, DATASECT
                 inc     edx
                 pusha
-                
 
+;; Now the compiler splits itselfe with the compiled programs. Here the compiler starts storing
+;; the executable code. 
+
+codebuf:
+                mov     ch, (TEXTSECT >> 8) & 0xFF
+                push    ecx
+                mov     cl, filesize - $$
+                lea     edi, [byte ecx + codebuf - filesize]
+                jmp     short relay
+
+;; At this point the compiling routine ends. :( soo saaaddddd......
+;; The compiler is now ready to go... 
+
+compilersize    equ     $ - $$
+
+;; Have fun and Arigato Gozaimasu!
